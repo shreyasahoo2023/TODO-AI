@@ -38,6 +38,7 @@ export default function LoginPage() {
     onError: () => setError("Google Login Failed"),
     flow: "implicit",
     prompt: "select_account",
+    use_fedcm_for_prompt: true,
   });
 
   const handleManualAuth = async (e) => {
