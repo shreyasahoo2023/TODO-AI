@@ -27,7 +27,8 @@ export default function Sidebar({ activeTab, setActiveTab, isSidebarOpen, setIsS
 
       {/* Sidebar */}
       <div className={cn(
-        "flex-shrink-0 h-screen fixed sticky top-0 border-r border-gray-200 dark:border-white/5 bg-white/95 dark:bg-[#121214]/95 backdrop-blur-xl transition-transform duration-300 z-50 flex flex-col",
+        "flex-shrink-0 h-screen border-r border-gray-200 dark:border-white/5 bg-white/95 dark:bg-[#121214]/95 backdrop-blur-xl transition-transform duration-300 z-50 flex flex-col",
+        "fixed md:sticky top-0 left-0",
         "w-64 md:w-20 lg:w-64",
         isSidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
       )}>
