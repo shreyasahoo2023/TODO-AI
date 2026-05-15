@@ -91,5 +91,6 @@ export default function Sidebar({ activeTab, setActiveTab, isSidebarOpen, setIsS
 
       </div>
     </div>
+    </>
   );
 }
