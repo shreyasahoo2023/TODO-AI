@@ -2,13 +2,13 @@ import { Search, Moon, Sun, Menu, LogOut } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
 
-export default function Navbar({ theme, setTheme, searchQuery, setSearchQuery, user, onLogout }) {
+export default function Navbar({ theme, setTheme, searchQuery, setSearchQuery, user, onLogout, setIsSidebarOpen }) {
   const [showDropdown, setShowDropdown] = useState(false);
 
   return (
     <header className="sticky top-0 z-30 w-full backdrop-blur-xl bg-white/60 dark:bg-[#121214]/60 border-b border-gray-200 dark:border-white/5 py-4 px-6 flex items-center justify-between">
       <div className="flex items-center gap-4 flex-1">
-        <button className="md:hidden text-gray-500 hover:text-indigo-500">
+        <button onClick={() => setIsSidebarOpen(true)} className="md:hidden text-gray-500 hover:text-indigo-500">
           <Menu size={24} />
         </button>
         <div className="relative w-full max-w-md hidden sm:block">

@@ -10,20 +10,31 @@ export default function LoginPage() {
   const { login } = useAuth();
 
   const [isRegistering, setIsRegistering] = useState(false);
+  const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [error, setError] = useState("");
+  const [successMsg, setSuccessMsg] = useState("");
   const [loading, setLoading] = useState(false);
 
 
   const handleManualAuth = async (e) => {
     e.preventDefault();
     setError("");
+    setSuccessMsg("");
     setLoading(true);
 
     try {
-      if (isRegistering) {
+      if (isForgotPassword) {
+        await axios.post(`${BASE_URL}/auth/reset-password`, {
+          email,
+          newPassword: password,
+        });
+        setSuccessMsg("Password reset successfully! You can now log in.");
+        setIsForgotPassword(false);
+        setPassword("");
+      } else if (isRegistering) {
         await axios.post(`${BASE_URL}/auth/register`, {
           email,
           name,
@@ -77,17 +88,17 @@ export default function LoginPage() {
             <Lock className="text-white w-8 h-8" />
           </motion.div>
           <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
-            {isRegistering ? "Create your account" : "Welcome back"}
+            {isForgotPassword ? "Reset Password" : isRegistering ? "Create your account" : "Welcome back"}
           </h1>
           <p className="mt-2 text-gray-500 dark:text-gray-400">
-            {isRegistering ? "Start organizing your life today" : "Please enter your details to sign in"}
+            {isForgotPassword ? "Enter your email and a new password" : isRegistering ? "Start organizing your life today" : "Please enter your details to sign in"}
           </p>
         </div>
 
         <div className="glass-panel rounded-3xl p-8 shadow-2xl backdrop-blur-xl border border-white/20 dark:border-white/5">
           <form onSubmit={handleManualAuth} className="space-y-4">
             <AnimatePresence mode="popLayout">
-              {isRegistering && (
+              {isRegistering && !isForgotPassword && (
                 <motion.div 
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: 'auto' }}
@@ -127,9 +138,21 @@ export default function LoginPage() {
 
             <div className="space-y-1">
               <div className="flex justify-between items-center ml-1">
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Password</label>
-                {!isRegistering && (
-                  <button type="button" className="text-xs text-indigo-500 hover:text-indigo-600 font-medium">Forgot password?</button>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  {isForgotPassword ? "New Password" : "Password"}
+                </label>
+                {!isRegistering && !isForgotPassword && (
+                  <button 
+                    type="button" 
+                    onClick={() => {
+                      setIsForgotPassword(true);
+                      setError("");
+                      setSuccessMsg("");
+                    }}
+                    className="text-xs text-indigo-500 hover:text-indigo-600 font-medium"
+                  >
+                    Forgot password?
+                  </button>
                 )}
               </div>
               <div className="relative">
@@ -155,6 +178,16 @@ export default function LoginPage() {
               </motion.div>
             )}
 
+            {successMsg && (
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="p-3 bg-green-500/10 border border-green-500/20 rounded-xl text-green-500 text-sm text-center"
+              >
+                {successMsg}
+              </motion.div>
+            )}
+
             <button
               type="submit"
               disabled={loading}
@@ -164,7 +197,7 @@ export default function LoginPage() {
                 <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               ) : (
                 <>
-                  {isRegistering ? "Create account" : "Sign in"}
+                  {isForgotPassword ? "Reset Password" : isRegistering ? "Create account" : "Sign in"}
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}
@@ -172,17 +205,33 @@ export default function LoginPage() {
           </form>
 
           <div className="mt-8 text-center">
-            <button
-              onClick={() => {
-                setIsRegistering(!isRegistering);
-                setError("");
-              }}
-              className="text-gray-600 dark:text-gray-400 text-sm hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors"
-            >
-              {isRegistering
-                ? "Already have an account? Sign in"
-                : "Don't have an account? Create one"}
-            </button>
+            {isForgotPassword ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setIsForgotPassword(false);
+                  setError("");
+                  setSuccessMsg("");
+                }}
+                className="text-gray-600 dark:text-gray-400 text-sm hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors"
+              >
+                Back to Sign in
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => {
+                  setIsRegistering(!isRegistering);
+                  setError("");
+                  setSuccessMsg("");
+                }}
+                className="text-gray-600 dark:text-gray-400 text-sm hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors"
+              >
+                {isRegistering
+                  ? "Already have an account? Sign in"
+                  : "Don't have an account? Create one"}
+              </button>
+            )}
           </div>
         </div>
 

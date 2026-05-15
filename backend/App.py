@@ -109,6 +109,28 @@ def register():
 
 
 
+# ---------------- RESET PASSWORD ----------------
+@app.route('/auth/reset-password', methods=['POST'])
+def reset_password():
+    data = request.json
+    email = data.get("email")
+    new_password = data.get("newPassword")
+
+    if users_collection:
+        result = users_collection.update_one(
+            {"email": email},
+            {"$set": {"password_hash": generate_password_hash(new_password)}}
+        )
+        if result.matched_count == 0:
+            return jsonify({"error": "User not found"}), 404
+    else:
+        if email not in mock_users:
+            return jsonify({"error": "User not found"}), 404
+        mock_users[email]["password_hash"] = generate_password_hash(new_password)
+
+    return jsonify({"message": "Password reset successfully"})
+
+
 # ---------------- AUTH DECORATOR ----------------
 def token_required(f):
     @wraps(f)

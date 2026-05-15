@@ -46,6 +46,7 @@ export default function App() {
   const [filter, setFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState('tasks');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [theme, setTheme] = useState(() => {
     if (typeof window !== "undefined") {
       return localStorage.getItem('theme') || 'dark';
@@ -182,10 +183,10 @@ export default function App() {
     <div className="flex bg-transparent min-h-screen">
       <div className="animated-bg" />
       
-      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} isSidebarOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen} />
 
       <main className="flex-1 flex flex-col min-w-0 md:ml-64">
-        <Navbar theme={theme} setTheme={setTheme} searchQuery={searchQuery} setSearchQuery={setSearchQuery} user={user} onLogout={logout} />
+        <Navbar theme={theme} setTheme={setTheme} searchQuery={searchQuery} setSearchQuery={setSearchQuery} user={user} onLogout={logout} setIsSidebarOpen={setIsSidebarOpen} />
 
         <div className="p-6 max-w-4xl w-full mx-auto flex-1 relative min-h-[500px]">
           <AnimatePresence mode="wait">
