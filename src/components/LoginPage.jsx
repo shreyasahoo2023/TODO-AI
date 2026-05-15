@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useGoogleLogin } from "@react-oauth/google";
 import { useAuth } from "../context/AuthContext";
 import { Lock, Mail, Key, User, ArrowRight } from "lucide-react";
 import axios from "axios";
@@ -17,29 +16,6 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleGoogleSuccess = async (tokenResponse) => {
-    try {
-      const { access_token } = tokenResponse;
-      const res = await axios.post(`${BASE_URL}/auth/google`, {
-        token: access_token,
-      });
-
-      if (res.data.user && res.data.token) {
-        login(res.data.user, res.data.token);
-      }
-    } catch (err) {
-      console.error(err);
-      setError("Google authentication failed");
-    }
-  };
-
-  const googleLogin = useGoogleLogin({
-    onSuccess: handleGoogleSuccess,
-    onError: () => setError("Google Login Failed"),
-    flow: "implicit",
-    prompt: "select_account",
-    use_fedcm_for_prompt: false,
-  });
 
   const handleManualAuth = async (e) => {
     e.preventDefault();
@@ -109,24 +85,6 @@ export default function LoginPage() {
         </div>
 
         <div className="glass-panel rounded-3xl p-8 shadow-2xl backdrop-blur-xl border border-white/20 dark:border-white/5">
-          {/* SOCIAL LOGIN */}
-          <button
-            onClick={() => googleLogin()}
-            className="w-full flex items-center justify-center gap-3 py-3 px-4 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl hover:bg-gray-50 dark:hover:bg-white/10 transition-all duration-200 font-medium text-gray-700 dark:text-gray-200"
-          >
-            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" className="w-5 h-5" />
-            Continue with Google
-          </button>
-
-          <div className="relative my-8">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-200 dark:border-white/10"></div>
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-4 text-gray-500 bg-white/0 backdrop-blur-none">Or continue with</span>
-            </div>
-          </div>
-
           <form onSubmit={handleManualAuth} className="space-y-4">
             <AnimatePresence mode="popLayout">
               {isRegistering && (

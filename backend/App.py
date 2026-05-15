@@ -7,7 +7,6 @@ from dotenv import load_dotenv
 from werkzeug.security import generate_password_hash, check_password_hash
 import jwt
 import datetime
-import requests
 from functools import wraps
 from bson.objectid import ObjectId
 import ssl
@@ -110,69 +109,7 @@ def register():
     return jsonify({"message": "Registered successfully"})
 
 
-# ---------------- GOOGLE AUTH ----------------
-@app.route('/auth/google', methods=['POST'])
-def google_auth():
-    data = request.json
-    access_token = data.get("token")
 
-    if not access_token:
-        return jsonify({"error": "No token provided"}), 400
-
-    try:
-        # Verify token and get user info from Google
-        google_res = requests.get(
-            f"https://www.googleapis.com/oauth2/v3/userinfo",
-            headers={"Authorization": f"Bearer {access_token}"}
-        )
-        
-        if google_res.status_code != 200:
-            return jsonify({"error": "Invalid Google token"}), 401
-
-        user_info = google_res.json()
-        email = user_info.get("email")
-        name = user_info.get("name")
-
-        # Find or create user
-        if users_collection:
-            user = users_collection.find_one({"email": email})
-            if not user:
-                users_collection.insert_one({
-                    "email": email,
-                    "name": name,
-                    "provider": "google",
-                    "created_at": datetime.datetime.utcnow()
-                })
-                user = users_collection.find_one({"email": email})
-        else:
-            user = mock_users.get(email)
-            if not user:
-                mock_users[email] = {
-                    "email": email,
-                    "name": name,
-                    "provider": "google",
-                    "created_at": datetime.datetime.utcnow()
-                }
-                user = mock_users[email]
-
-        # Create JWT token
-        token = jwt.encode({
-            "email": email,
-            "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=24)
-        }, JWT_SECRET, algorithm="HS256")
-
-        return jsonify({
-            "user": {
-                "email": email,
-                "name": name,
-                "avatar": user_info.get("picture")
-            },
-            "token": token
-        })
-
-    except Exception as e:
-        print(f"Google Auth Error: {str(e)}")
-        return jsonify({"error": "Authentication failed"}), 500
 
 
 # ---------------- AUTH DECORATOR ----------------

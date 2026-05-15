@@ -1,5 +1,4 @@
 import { createContext, useContext, useState, useEffect } from "react";
-import { googleLogout } from "@react-oauth/google";
 
 const AuthContext = createContext();
 
@@ -25,7 +24,6 @@ export function AuthProvider({ children }) {
   };
 
   const logout = () => {
-    googleLogout();
     setUser(null);
     localStorage.removeItem("auth_user");
     localStorage.removeItem("auth_token");
