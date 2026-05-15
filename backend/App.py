@@ -21,10 +21,7 @@ load_dotenv()
 app = Flask(__name__)
 
 # ---------------- CORS ----------------
-CORS(app, origins=[
-    "http://localhost:5173",
-    "https://shreya-todo.vercel.app"
-])
+CORS(app, supports_credentials=True) # Allow all origins so Netlify works automatically
 
 # ---------------- DATABASE ----------------
 MONGO_URI = os.getenv("MONGO_URI")
