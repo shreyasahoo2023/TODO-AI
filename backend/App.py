@@ -47,6 +47,30 @@ mock_tasks = {}
 # ---------------- ENV VARIABLES ----------------
 JWT_SECRET = os.getenv("JWT_SECRET", "fallback-secret")
 
+# ---------------- AUTH DECORATOR ----------------
+def token_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = None
+        if 'Authorization' in request.headers:
+            auth_header = request.headers['Authorization']
+            if auth_header.startswith("Bearer "):
+                token = auth_header.split(" ")[1]
+
+        if not token:
+            return jsonify({'error': 'Token is missing!'}), 401
+
+        try:
+            data = jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
+            current_user_email = data['email']
+        except:
+            return jsonify({'error': 'Token is invalid!'}), 401
+
+        return f(current_user_email, *args, **kwargs)
+
+    return decorated
+
+
 # ---------------- ROOT ----------------
 @app.route("/")
 def home():
@@ -187,30 +211,6 @@ def update_profile(current_user_email):
         "user": {"email": new_email, "name": new_name},
         "token": token
     })
-
-
-# ---------------- AUTH DECORATOR ----------------
-def token_required(f):
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        token = None
-        if 'Authorization' in request.headers:
-            auth_header = request.headers['Authorization']
-            if auth_header.startswith("Bearer "):
-                token = auth_header.split(" ")[1]
-
-        if not token:
-            return jsonify({'error': 'Token is missing!'}), 401
-
-        try:
-            data = jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
-            current_user_email = data['email']
-        except:
-            return jsonify({'error': 'Token is invalid!'}), 401
-
-        return f(current_user_email, *args, **kwargs)
-
-    return decorated
 
 
 # ---------------- TASK ROUTES ----------------
