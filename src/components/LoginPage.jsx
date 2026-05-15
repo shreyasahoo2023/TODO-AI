@@ -24,8 +24,8 @@ export default function LoginPage() {
         token: access_token,
       });
 
-      if (res.data.user) {
-        login(res.data.user, access_token);
+      if (res.data.user && res.data.token) {
+        login(res.data.user, res.data.token);
       }
     } catch (err) {
       console.error(err);
@@ -38,7 +38,7 @@ export default function LoginPage() {
     onError: () => setError("Google Login Failed"),
     flow: "implicit",
     prompt: "select_account",
-    use_fedcm_for_prompt: true,
+    use_fedcm_for_prompt: false,
   });
 
   const handleManualAuth = async (e) => {

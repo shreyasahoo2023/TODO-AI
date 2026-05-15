@@ -33,9 +33,9 @@ try:
     client = MongoClient(MONGO_URI, tlsInsecure=True, serverSelectionTimeoutMS=10000, connectTimeoutMS=10000)
     # Force a connection to validate it works
     client.admin.command('ping')
-    print("✓ MongoDB connected successfully")
+    print("[OK] MongoDB connected successfully")
 except Exception as e:
-    print(f"✗ MongoDB connection failed: {e}")
+    print(f"[ERROR] MongoDB connection failed: {e}")
     print("Using mock database for testing")
     client = None
 
