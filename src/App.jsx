@@ -108,10 +108,24 @@ export default function App() {
     const task = tasks.find(t => t.id === id);
     if (!task) return;
 
+    const newStatus = !task.completed;
+
     // Optimistic UI update
-    setTasks(prev => prev.map(t => t.id === id ? { ...t, completed: !t.completed } : t));
+    setTasks(prev => prev.map(t => t.id === id ? { ...t, completed: newStatus } : t));
+    
+    // Trigger notification if newly completed and notifications are enabled
+    if (newStatus) {
+      const pushEnabled = JSON.parse(localStorage.getItem('pushEnabled')) ?? true;
+      if (pushEnabled && "Notification" in window && Notification.permission === "granted") {
+        new Notification("Task Completed! 🎉", {
+          body: `Great job completing: ${task.title}`,
+          icon: "https://api.dicebear.com/7.x/notionists/svg?seed=Felix"
+        });
+      }
+    }
+
     try {
-      await axios.put(`${import.meta.env.VITE_API_URL}/update/${id}`, { completed: !task.completed });
+      await axios.put(`${import.meta.env.VITE_API_URL}/update/${id}`, { completed: newStatus });
     } catch (e) {
       console.error("Failed toggling", e);
       // Revert if failed
@@ -206,8 +220,6 @@ export default function App() {
               <motion.div key="settings" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20, position: 'absolute', width: '100%' }} transition={{ duration: 0.3 }}>
                 <Settings 
                   theme={theme} setTheme={setTheme} 
-                  userProfile={{name: user.name, email: user.email, picture: user.picture}} 
-                  setUserProfile={() => {}} 
                   tasks={tasks}
                   compactMode={compactMode} setCompactMode={setCompactMode}
                 />

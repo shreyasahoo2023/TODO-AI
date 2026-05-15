@@ -73,7 +73,10 @@ def login():
     }, JWT_SECRET, algorithm="HS256")
 
     return jsonify({
-        "user": {"email": email},
+        "user": {
+            "email": email, 
+            "name": user.get("name", "User")
+        },
         "token": token
     })
 
@@ -129,6 +132,61 @@ def reset_password():
         mock_users[email]["password_hash"] = generate_password_hash(new_password)
 
     return jsonify({"message": "Password reset successfully"})
+
+
+# ---------------- UPDATE PROFILE ----------------
+@app.route('/auth/update-profile', methods=['PUT'])
+@token_required
+def update_profile(current_user_email):
+    data = request.json
+    new_name = data.get("name")
+    new_email = data.get("email")
+
+    if not new_name or not new_email:
+        return jsonify({"error": "Name and email are required"}), 400
+
+    email_changed = (current_user_email != new_email)
+
+    if users_collection:
+        if email_changed and users_collection.find_one({"email": new_email}):
+            return jsonify({"error": "Email already in use"}), 409
+            
+        users_collection.update_one(
+            {"email": current_user_email},
+            {"$set": {"name": new_name, "email": new_email}}
+        )
+        
+        if email_changed and tasks_collection:
+            tasks_collection.update_many(
+                {"user_email": current_user_email},
+                {"$set": {"user_email": new_email}}
+            )
+    else:
+        if email_changed and new_email in mock_users:
+            return jsonify({"error": "Email already in use"}), 409
+            
+        if current_user_email in mock_users:
+            user_data = mock_users.pop(current_user_email)
+            user_data["name"] = new_name
+            user_data["email"] = new_email
+            mock_users[new_email] = user_data
+            
+        if email_changed:
+            for task_id, task in mock_tasks.items():
+                if task.get("user_email") == current_user_email:
+                    task["user_email"] = new_email
+
+    # Generate new token
+    token = jwt.encode({
+        "email": new_email,
+        "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=24)
+    }, JWT_SECRET, algorithm="HS256")
+
+    return jsonify({
+        "message": "Profile updated successfully",
+        "user": {"email": new_email, "name": new_name},
+        "token": token
+    })
 
 
 # ---------------- AUTH DECORATOR ----------------
